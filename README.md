@@ -36,9 +36,9 @@ activate the venv:
 run the command:
   pyinstall mainwindow.py
 
-a folder called dist will be created with a subfolder called mainwindow. 
+a directory called dist will be created with a subdirectory called mainwindow. 
 
-copy the 'resources' folder folder from the source code folder into the dist/mainwidnow folder. Additionally you have to move the 'lspopt' folder within the resource folder into /dist/mainwindow/. 
+copy the 'resources' and 'lspopt' directory from the source code directory into the dist/mainwidnow directory. 
 
 double click the mainwindow.exe to run
   
