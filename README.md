@@ -2,7 +2,7 @@
 
 This repository contains an implementation of the **dreamento online**, altered from this (https://github.com/dreamento/dreamento) repository.
 
-Before you use this repository i suggest you visit the original one and follow the instructions there.
+Before you use this repository I suggest you visit the original one and follow the instructions there.
 
 ## changes from the original repository
 The TCP socket made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data put there by the HDServer.
