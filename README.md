@@ -46,4 +46,5 @@ wait. it may take a minute or 2 for the application to start.
 If it starts and closes immediatly run the mainwindow.exe from a cmd and see the output. 
 
 ## usage
-make sure HDServer from hypnodyne is running
+make sure **HDServer** and **HDRecorder** from hypnodyne are running. 
+Without the HDServer the connection wont work, without the HDRecorder the record timer will freeze at 1 second and with it the whole program will!
