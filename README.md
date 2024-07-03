@@ -25,7 +25,7 @@ make sure pip is upgraded:
   python -m pip install --upgrade pip
 
 install the requirements from requirements.txt located in the repository:
-  python -m pip install requirements.txt
+  python -m pip install -r requirements.txt
 
 run mainwindow.py from your cmd that has the venv activated
 
