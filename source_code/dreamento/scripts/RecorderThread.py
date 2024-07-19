@@ -1,3 +1,4 @@
+import os
 from datetime import datetime  # for saving files with exact time
 import time
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -76,7 +77,7 @@ class RecordThread(QThread):
         now = datetime.now()  # for file name
         dt_string = now.strftime("recording-date-%Y-%m-%d-time-%H-%M-%S")
         file_path = f".\\recordings\\{dt_string}"
-        file_name = f"{file_path}\\{dt_string}-complete.txt"
+        file_name = f"{file_path}\\complete.txt"
         Path(f"{file_path}").mkdir(parents=True, exist_ok=True)  # ensures directory exists
 
         actual_start_time = time.time()
@@ -158,7 +159,7 @@ class RecordThread(QThread):
 
         np.savetxt(file_name, recording, delimiter=',')  # save recording as txt
         print(f"Recording saved to {file_name}")
-        np.save("samples_db.npy", self.samples_db)
+        np.save(os.path.join(file_path, 'samples_db.npy'), self.samples_db)
 
         self.recordingFinishedSignal.emit(f"{file_path}\\{dt_string}")  # send path of recorded file to mainWindow
 
