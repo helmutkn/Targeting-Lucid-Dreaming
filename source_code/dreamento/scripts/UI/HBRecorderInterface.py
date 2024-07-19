@@ -1,9 +1,12 @@
 import json
 
-from source_code.dreamento.scripts.RecorderThread import RecordThread
+import numpy as np
+
+import realTimeAutoScoring
+from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGPlotWindow
 from source_code.dreamento.scripts.UI.utility_functions import threaded
-from source_code.dreamento.scripts.ZmaxHeadband import ZmaxHeadband
+from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 
 
 class HBRecorderInterface:
@@ -15,12 +18,22 @@ class HBRecorderInterface:
         self.isRecording = False
         self.firstRecording = True
 
+        # stimulations
         self.stimulationDataBase = {}  # have info of all triggered stimulations
+
+        # scoring
+        self.sleepScoringModel = None
         self.scoring_predictions = []
-
         self.epochCounter = 0
+        self.sleepScoringModelPath = None
 
+
+        # visualization
         self.eegPlot = None
+
+        # program parameters
+        self.plotEEG = False
+        self.scoreSleep = False
 
     def connectToSoftware(self):
         self.hb = ZmaxHeadband()
@@ -75,24 +88,58 @@ class HBRecorderInterface:
                 self.scoring_predictions.insert(0, -1)  # first epoch is not predicted, therefore put -1 instead
                 outfile.write("\n".join(str(item) for item in self.scoring_predictions))
 
-    def getEEG_from_thread(self, eegSignal_r, eegSignal_l,
-                           plot_EEG=False, plot_periodogram=False,
-                           plot_spectrogram=False, sleep_scoring=True,
-                           epoch_counter=0):
+    def setSleepScoringModel(self, path):
+        self.sleepScoringModelPath = path
+
+    def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
 
         self.epochCounter = epoch_counter
-        if plot_EEG:
+        if self.plotEEG:
             sigR = eegSignal_r
             sigL = eegSignal_l
             t = [number / self.sample_rate for number in range(len(eegSignal_r))]
             self.eegPlot.setData(t, sigR, sigL)
 
+        if self.scoreSleep:
+            if self.sleepScoringModel is None:
+                self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
+
+            # 30 seconds, each 256 samples... send recording for last 30 seconds to model for prediction
+            sigRef = np.asarray(eegSignal_r)
+            sigReq = np.asarray(eegSignal_l)
+            sigRef = sigRef.reshape((1, sigRef.shape[0]))
+            sigReq = sigReq.reshape((1, sigReq.shape[0]))
+            modelPrediction = realTimeAutoScoring.Predict_array(
+                output_dir="./DataiBand/output/Fp1-Fp2_filtered",
+                args_log_file="info_ch_extract.log", filtering_status=True,
+                lowcut=0.3, highcut=30, fs=256, signal_req=sigReq, signal_ref=sigRef, model=self.sleepScoringModel)
+
+            #self.displayEpochPredictionResult(int(modelPrediction[0]),
+            #                                  int(self.epochCounter))  # display prediction result on mainWindow
+            self.scoring_predictions.append(int(modelPrediction[0]))
+
     @threaded
     def show_eeg_signal(self):
-        if self.eegPlot:
+        if self.plotEEG:
             self.eegPlot.stop()
-            self.eegPlot = None
+            self.plotEEG = None
         else:
-            self.eegPlot = True
+            self.plotEEG = True
             self.eegPlot = EEGPlotWindow(self.sample_rate)
             self.eegPlot.show()
+
+    @threaded
+    def show_scoring_predictions(self):
+        # TODO: continue here
+        pass
+
+    def start_scoring(self):
+        self.scoreSleep = True
+
+    def stop_scoring(self):
+        self.scoreSleep = False
+
+
+
+
+

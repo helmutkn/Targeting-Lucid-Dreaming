@@ -35,3 +35,7 @@ class SleepRecorderCLI(cmd.Cmd):
         """Shoe the eeg signal"""
         self.headbandinterface.show_eeg_signal()
 
+    def do_start_scoring(self, line):
+        """start scoring the eeg signal using the specified model"""
+        self.headbandinterface.slee
+
