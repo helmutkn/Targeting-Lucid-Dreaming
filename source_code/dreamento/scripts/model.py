@@ -8,7 +8,7 @@ tf.compat.v1.disable_eager_execution()
 import tf_slim as contrib_slim
 # import tensorflow.contrib.slim as contrib_slim
 
-import scripts.nn as nn
+import source_code.dreamento.scripts.nn as nn
 
 import logging
 logger = logging.getLogger("default_log")

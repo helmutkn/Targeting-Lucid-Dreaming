@@ -2,8 +2,8 @@ import numpy as np
 import time
 import enum
 
-from scripts.ZmaxSocket import ZmaxSocket
-from scripts.CustomSocket import CustomSocket
+from source_code.dreamento.scripts.ZmaxSocket import ZmaxSocket
+from source_code.dreamento.scripts.CustomSocket import CustomSocket
 
 
 class ZmaxDataID(enum.Enum):

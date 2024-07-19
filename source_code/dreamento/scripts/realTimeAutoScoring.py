@@ -30,10 +30,10 @@
 import os
 import numpy as np
 import scipy.signal as ssignal
-from scripts.model import TinySleepNet
-from scripts.minibatching import (iterate_batch_seq_minibatches,
+from source_code.dreamento.scripts.model import TinySleepNet
+from source_code.dreamento.scripts.minibatching import (iterate_batch_seq_minibatches,
                                                       iterate_batch_multiple_seq_minibatches)
-from scripts.logger import get_logger
+from source_code.dreamento.scripts.logger import get_logger
 
 # from ssccoorriinngg import ssccoorriinngg  # TODO: add plotting if needed
 
