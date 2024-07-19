@@ -19,7 +19,6 @@ class CustomSocket:
         self.serverConnected = False
         if sock is None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
-        # self.connect()
 
     def sendString(self, msg):
         print('sending is not allowed in this class. It solely reads the transmition on a socket.')
