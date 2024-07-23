@@ -17,6 +17,7 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def do_quit(self, line):
         """Exit the CLI."""
+        self.headbandinterface.quit()
         return True
 
     def do_connect(self, line):
@@ -33,9 +34,17 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def do_show_signal(self, line):
         """Shoe the eeg signal"""
-        self.headbandinterface.show_eeg_signal()
+        try:
+            self.headbandinterface.show_eeg_signal()
+        except Exception as e:
+            print(e)
+
 
     def do_start_scoring(self, line):
         """start scoring the eeg signal using the specified model"""
-        self.headbandinterface.slee
+        self.headbandinterface.start_scoring()
+
+    def do_show_scoring(self, line):
+        """visualize the predictions of the scoring model"""
+        self.headbandinterface.show_scoring_predictions()
 

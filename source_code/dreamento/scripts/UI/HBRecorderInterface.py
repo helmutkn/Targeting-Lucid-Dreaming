@@ -5,6 +5,7 @@ import numpy as np
 import realTimeAutoScoring
 from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGPlotWindow
+from source_code.dreamento.scripts.UI.SleepStatePlot import SleepStatePlot
 from source_code.dreamento.scripts.UI.utility_functions import threaded
 from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 
@@ -27,13 +28,14 @@ class HBRecorderInterface:
         self.epochCounter = 0
         self.sleepScoringModelPath = None
 
-
         # visualization
         self.eegPlot = None
+        self.scorePlot = None
 
         # program parameters
         self.plotEEG = False
         self.scoreSleep = False
+        self.plotScore = False
 
     def connectToSoftware(self):
         self.hb = ZmaxHeadband()
@@ -103,7 +105,6 @@ class HBRecorderInterface:
         if self.scoreSleep:
             if self.sleepScoringModel is None:
                 self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
-
             # 30 seconds, each 256 samples... send recording for last 30 seconds to model for prediction
             sigRef = np.asarray(eegSignal_r)
             sigReq = np.asarray(eegSignal_l)
@@ -117,27 +118,42 @@ class HBRecorderInterface:
             #self.displayEpochPredictionResult(int(modelPrediction[0]),
             #                                  int(self.epochCounter))  # display prediction result on mainWindow
             self.scoring_predictions.append(int(modelPrediction[0]))
+            self.scorePlot.setData(int(modelPrediction[0]))
 
     @threaded
     def show_eeg_signal(self):
+        print('still here')
         if self.plotEEG:
             self.eegPlot.stop()
-            self.plotEEG = None
+            self.eegPlot = None
+            self.plotEEG = False
         else:
             self.plotEEG = True
             self.eegPlot = EEGPlotWindow(self.sample_rate)
             self.eegPlot.show()
+        print('still here')
 
     @threaded
     def show_scoring_predictions(self):
-        # TODO: continue here
-        pass
+        if self.plotScore:
+            self.scorePlot.stop()
+            self.scorePlot = None
+            self.plotScore = False
+        else:
+            self.plotScore = True
+            self.scorePlot = SleepStatePlot()
+            self.scorePlot.show()
 
     def start_scoring(self):
         self.scoreSleep = True
 
     def stop_scoring(self):
         self.scoreSleep = False
+
+    def quit(self):
+        self.eegPlot.stop()
+        self.scorePlot.stop()
+
 
 
 

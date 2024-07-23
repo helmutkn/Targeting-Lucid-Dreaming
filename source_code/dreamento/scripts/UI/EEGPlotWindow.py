@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication
 import pyqtgraph as pg  # for eeg plotting
 
 
-
 class EEGPlotWindow:
     def __init__(self, sample_rate):
         self.sample_rate = sample_rate
@@ -23,8 +22,6 @@ class EEGPlotWindow:
 
         self.eegLine1 = self.plotWidget.plot(t, np.random.randn(30 * self.sample_rate), self.EEGLinePen1)
         self.eegLine2 = self.plotWidget.plot(t, np.random.randn(30 * self.sample_rate), self.EEGLinePen2)
-
-        self.plotWidget.setWindowTitle('EEG Signal')
 
     def show(self):
         self.plotWidget.show()
