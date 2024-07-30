@@ -31,7 +31,7 @@ import time
 import os
 import numpy as np
 import scipy.signal as ssignal
-from model import TinySleepNet
+from source_code.dreamento.scripts.SleepScoring.model import TinySleepNet
 from minibatching import (iterate_minibatches,
                           iterate_batch_seq_minibatches,
                           iterate_batch_multiple_seq_minibatches)

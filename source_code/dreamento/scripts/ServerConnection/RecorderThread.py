@@ -15,14 +15,13 @@ class RecordThread(QThread):
         str)  # a sending signal to mainWindow - sends name of stored file to mainWindow
     epochPredictionResultSignal = pyqtSignal(int, int)
     sendEEGdata2MainWindow = pyqtSignal(object, object, bool, bool, bool, bool, int)
-    sendData2MainWindow = pyqtSignal(object, object, bool, bool, bool, bool, int)
+    sendData2MainWindow = pyqtSignal(object, object)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, signalType: list = [0, 1, 5, 2, 3, 4]):
         super(RecordThread, self).__init__(parent)
         self.model_CNNLSTM = None
         self.threadactive = True
-        self.signalType = [0, 1, 5, 2, 3, 4]  # "EEGR, EEGL, TEMP, DX, DY, DZ"
-        # self.signalType = [ZmaxDataID.eegr, ZmaxDataID.eegl, ZmaxDataID.bodytemp, ZmaxDataID.dx, ZmaxDataID.dy, ZmaxDataID.dz] # "EEGR, EEGL, TEMP, DX, DY, DZ"
+        self.signalType = signalType  # "EEGR, EEGL, TEMP, DX, DY, DZ"
         self.stimulationType = ""
         self.secondCounter = 0
         self.dataSampleCounter = 0
@@ -53,9 +52,8 @@ class RecordThread(QThread):
         return [self.dataSampleCounter, self.secondCounter,
                 self.totalDataSampleCounter]  # returns time info of stimulation, when called
 
-    def sendData2main(self, data=None, columns=None, plot_EEG=False, plot_periodogram=False, plot_spectrogram=False,
-                         score_sleep=False):
-        self.sendData2MainWindow.emit(data, columns, plot_EEG, plot_periodogram, plot_spectrogram, score_sleep, self.epochCounter)
+    def sendData2main(self, data=None, columns=None):
+        self.sendData2MainWindow.emit(data, columns)
 
     def sendEEGdata2main(self,
                          eegSigR=None, eegSigL=None,
@@ -133,8 +131,11 @@ class RecordThread(QThread):
                                 else:
                                     buffer2analyzeIsReady = True
                                     self.epochCounter += 1
+                        self.sendData2main(dataEntry, cols)
 
                 else:
+                    sig = [1,2,3,4]
+                    self.sendData2main(data=sig, columns=cols)
                     #print("[] data")
                     continue
 
