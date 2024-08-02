@@ -8,7 +8,6 @@ from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
 from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGPlotWindow, GuiThread
 from source_code.dreamento.scripts.UI.SleepStatePlot import SleepStatePlot
-from source_code.dreamento.scripts.UI.utility_functions import threaded
 from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 
 
@@ -79,7 +78,7 @@ class HBRecorderInterface:
         self.recordingThread.finished.connect(self.onRecordingFinished)
         self.recordingThread.recordingFinishedSignal.connect(self.onRecordingFinishedWriteStimulationDB)
         self.recordingThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
-        self.recordingThread.sendData2MainWindow.connect(self.getData_from_thread)
+        #self.recordingThread.sendData2MainWindow.connect(self.getData_from_thread)
 
         print('recording started')
 
@@ -87,6 +86,7 @@ class HBRecorderInterface:
         if not self.isRecording:
             return
 
+        self.eegThread.update_plot(range(100), range(100))
         self.recordingThread.stop()
         self.isRecording = False
         print('recording stopped')
@@ -114,6 +114,7 @@ class HBRecorderInterface:
         pass
 
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
+        print('recieved data')
         self.epochCounter = epoch_counter
 
         if self.plotEEG:
@@ -159,7 +160,6 @@ class HBRecorderInterface:
             #self.eegPlot = EEGPlotWindow(self.sample_rate)
             #self.eegPlot.show()
 
-    @threaded
     def show_scoring_predictions(self):
         if self.plotScore:
             self.scorePlot.stop()

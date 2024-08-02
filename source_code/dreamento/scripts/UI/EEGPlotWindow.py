@@ -6,14 +6,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 import numpy as np
 
-from source_code.dreamento.scripts.UI.utility_functions import threaded
-
 import sys
 import threading
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal, QObject
 import pyqtgraph as pg
 import numpy as np
+
 
 class PlotWindow(QMainWindow):
     def __init__(self):
@@ -38,6 +37,7 @@ class PlotWindow(QMainWindow):
     def update_plot(self, x, y):
         """Update the plot with new data."""
         self.plot.setData(x, y)
+
 
 class GuiThread(threading.Thread):
     def __init__(self):

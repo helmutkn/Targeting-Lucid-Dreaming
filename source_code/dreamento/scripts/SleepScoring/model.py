@@ -4,10 +4,12 @@ import os
 import timeit
 import numpy as np
 import sklearn.metrics as skmetrics
-from network import TinySleepNet
 from torch.optim import Adam
 from tensorboardX import SummaryWriter
 import logging
+
+from source_code.dreamento.scripts.SleepScoring.network import TinySleepNet
+
 logger = logging.getLogger("default_log")
 
 

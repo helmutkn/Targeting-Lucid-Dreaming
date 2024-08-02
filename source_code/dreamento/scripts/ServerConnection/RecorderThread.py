@@ -13,9 +13,8 @@ class RecordThread(QThread):
         int)  # a sending signal to mainWindow - sends time info of ongoing recording to mainWindow
     recordingFinishedSignal = pyqtSignal(
         str)  # a sending signal to mainWindow - sends name of stored file to mainWindow
-    epochPredictionResultSignal = pyqtSignal(int, int)
     sendEEGdata2MainWindow = pyqtSignal(object, object, bool, bool, bool, bool, int)
-    sendData2MainWindow = pyqtSignal(object, object)
+    #sendData2MainWindow = pyqtSignal(object, object)
 
     def __init__(self, parent=None, signalType: list = [0, 1, 5, 2, 3, 4]):
         super(RecordThread, self).__init__(parent)
@@ -55,10 +54,10 @@ class RecordThread(QThread):
     def sendData2main(self, data=None, columns=None):
         self.sendData2MainWindow.emit(data, columns)
 
-    def sendEEGdata2main(self,
-                         eegSigR=None, eegSigL=None,
+    def sendEEGdata2main(self, eegSigR=None, eegSigL=None,
                          plot_EEG=False, plot_periodogram=False, plot_spectrogram=False,
                          score_sleep=False):
+        print('sending eeg to main 2')
         self.sendEEGdata2MainWindow.emit(eegSigR, eegSigL, plot_EEG, plot_periodogram, plot_spectrogram,
                                          score_sleep, self.epochCounter)
 
@@ -94,7 +93,7 @@ class RecordThread(QThread):
             if self.epochCounter % 60 == 0 and dataSamplesToAnalyzeCounter == 0:
                 del hb
                 hb = ZmaxHeadband()
-                #print("New HB created after 60 epochs")
+                print("New HB created after 60 epochs")
 
             self.dataSampleCounter = 0  # count samples in each second
             self.secondCounter += 1
@@ -103,7 +102,7 @@ class RecordThread(QThread):
 
             t_end = time.time() + 1
 
-            #print(f'{self.secondCounter} start')
+            print(f'{self.secondCounter} start')
             while time.time() < t_end:
                 x = hb.read(cols[:-2])
                 if x:
@@ -125,24 +124,23 @@ class RecordThread(QThread):
                                     sigL_accumulative.append(line[ZmaxDataID.eegl.value])
 
                                     if dataSamplesToAnalyzeCounter % self.sample_rate/2 == 0:  # send EEG data for plotting to mainWindow
+                                        print('sending eeg to main 1')
                                         self.sendEEGdata2main(eegSigR=sigR_accumulative, eegSigL=sigL_accumulative,
                                                               plot_EEG=True)
 
                                 else:
                                     buffer2analyzeIsReady = True
                                     self.epochCounter += 1
-                        self.sendData2main(dataEntry, cols)
 
                 else:
-                    sig = [1,2,3,4]
-                    self.sendData2main(data=sig, columns=cols)
                     #print("[] data")
                     continue
 
             self.samples_db.append(self.dataSampleCounter)
-            #print(f'{self.dataSampleCounter} samples')
+            print(f'{self.dataSampleCounter} samples')
             if buffer2analyzeIsReady:
                 # send eeg data of last 30 seconds (30*256 samples) to mainWindow for plotting (spectrogram and periodogram) and sleep scoring
+                print('sending eeg to main')
                 self.sendEEGdata2main(eegSigR=sigR_accumulative, eegSigL=sigL_accumulative,
                                       plot_periodogram=True, plot_spectrogram=True, score_sleep=True)
                 dataSamplesToAnalyzeCounter = 0

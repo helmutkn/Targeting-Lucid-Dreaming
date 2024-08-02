@@ -1,5 +1,6 @@
 import cmd
 
+from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
 from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInterface
 
 
@@ -10,6 +11,8 @@ class SleepRecorderCLI(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.headbandinterface = HBRecorderInterface()
+        self.eegThread = GuiThread()
+
 
     def do_hello(self, line):
         """Print a greeting."""
@@ -35,6 +38,7 @@ class SleepRecorderCLI(cmd.Cmd):
     def do_show_signal(self, line):
         """Shoe the eeg signal"""
         try:
+            #self.eegThread.start()
             self.headbandinterface.show_eeg_signal()
         except Exception as e:
             print(e)
@@ -68,4 +72,7 @@ class SleepRecorderCLI(cmd.Cmd):
     def do_show_possible_signals(self, line):
         mes = '[0=eegr, 1=eegl, 2=dx, 3=dy, 4=dz, 5=bodytemp, 6=bat, 7=noise, 8=light, 9=nasal_l, 10=nasal_r, 11=oxy_ir_ac, 12=oxy_r_ac, 13=oxy_dark_ac, 14=oxy_ir_dc, 15=oxy_r_dc, 16=oxy_dark_dc]'
         print(mes)
+
+    def do_test(self, line):
+        self.headbandinterface.eegThread.update_plot(range(100), range(100))
 
