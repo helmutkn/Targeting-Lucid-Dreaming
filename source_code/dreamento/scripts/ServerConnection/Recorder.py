@@ -7,21 +7,24 @@ from source_code.dreamento.scripts.ServerConnection.RecorderThread import Record
 
 
 class Recorder(threading.Thread):
-    def __init__(self):
+    def __init__(self, signalType):
+
         super().__init__()
+
+        self.signalType = signalType
+        self.recorderThread = RecordThread(signalType=self.signalType)
         self.app = None
-        self.recorderThread = None
 
     def run(self):
         self.app = QApplication(sys.argv)
-        self.recorderThread = RecordThread()
         self.recorderThread.start()
-        self.app.exec()
+        sys.exit(self.app.exec())
 
     def stop(self):
         self.recorderThread.stop()
         self.recorderThread.quit()
         self.app.quit()
+
 
 
 

@@ -54,7 +54,7 @@ class GuiThread(threading.Thread):
         self.window.show()
 
         # Execute the application
-        self.app.exec_()
+        sys.exit(self.app.exec_())
 
     def update_plot(self, x, y):
         print('update_plot called')

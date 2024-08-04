@@ -11,7 +11,7 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def __init__(self):
         cmd.Cmd.__init__(self)
-        self.rec = Recorder()
+        #self.rec = Recorder()
 
         self.headbandinterface = HBRecorderInterface()
         #self.eegThread = GuiThread()
@@ -31,13 +31,13 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def do_start(self, line):
         """Start the recoring"""
-        #self.headbandinterface.startRecording()
-        self.rec.start()
+        self.headbandinterface.startRecording()
+        #self.rec.start()
 
     def do_stop(self, line):
         """Stop the recording"""
-        #self.headbandinterface.stopRecording()
-        self.rec.stop()
+        self.headbandinterface.stopRecording()
+        #self.rec.stop()
 
     def do_show_signal(self, line):
         """Shoe the eeg signal"""

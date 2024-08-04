@@ -5,23 +5,16 @@ import numpy as np
 import requests
 
 from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
-from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
-from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
-from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
-from source_code.dreamento.scripts.UI.SleepStatePlot import SleepStatePlot
 from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
+from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
+from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
+
+from PyQt5.QtCore import QObject
 
 
-class HBRecorderInterface():
+class HBRecorderInterface:
     def __init__(self):
-        self.hb = None
         self.sample_rate = 256
-        self.recordingThread = None
-        self.recorder = Recorder()
-
-        self.isRecording = False
-        self.firstRecording = True
-
         # signal type
         self.signalType = [0, 1, 2, 3, 4, 5, 7, 8]
         # [
@@ -30,6 +23,12 @@ class HBRecorderInterface():
         #   11=oxy_ir_ac, 12=oxy_r_ac, 13=oxy_dark_ac,
         #   14=oxy_ir_dc, 15=oxy_r_dc, 16=oxy_dark_dc
         # ]
+
+        self.hb = None
+        self.recorder = Recorder(self.signalType)
+
+        self.isRecording = False
+        self.firstRecording = True
 
         # stimulations
         self.stimulationDataBase = {}  # have info of all triggered stimulations
@@ -41,12 +40,9 @@ class HBRecorderInterface():
         self.sleepScoringModelPath = None
 
         # visualization
-        self.eegPlot = None
-
-        #self.eegThread = GuiThread()
+        self.eegThread = GuiThread()
 
         # program parameters
-        self.plotEEG = False
         self.scoreSleep = False
 
         # webhook
@@ -64,7 +60,7 @@ class HBRecorderInterface():
         if self.isRecording:
             return
 
-        #self.recordingThread = RecordThread(signalType=self.signalType)
+        self.recorder = Recorder(self.signalType)
 
         if self.firstRecording:
             # TODO: init sleep scoring model here
@@ -74,15 +70,11 @@ class HBRecorderInterface():
         self.isRecording = True
 
         self.recorder.start()
+
+        # TODO: This binding of the signals does not work. Therfore getEEG_from_thread is not called
         self.recorder.recorderThread.finished.connect(self.onRecordingFinished)
         self.recorder.recorderThread.recordingFinishedSignal.connect(self.onRecordingFinishedWriteStimulationDB)
         self.recorder.recorderThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
-
-        #self.recordingThread.start()
-
-        #self.recordingThread.finished.connect(self.onRecordingFinished)
-        #self.recordingThread.recordingFinishedSignal.connect(self.onRecordingFinishedWriteStimulationDB)
-        #self.recordingThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
 
         print('recording started')
 
@@ -119,13 +111,11 @@ class HBRecorderInterface():
         print('recieved data:')
         self.epochCounter = epoch_counter
 
-        if self.plotEEG:
+        if self.eegThread.is_alive():
             sigR = eegSignal_r
             sigL = eegSignal_l
             t = [number / self.sample_rate for number in range(len(eegSignal_r))]
-            #self.eegPlot.setData(t, sigR, sigL)
-            print(sigR, sigL)
-            #self.eegThread.update_plot(sigR, sigL)
+            self.eegThread.update_plot(sigR, sigL)
             print('signal sent to plot')
 
         predictionToTransmit = None
@@ -154,11 +144,11 @@ class HBRecorderInterface():
                 requests.post(self.webHookBaseAdress + 'sleepstate', data=data)
 
     def show_eeg_signal(self):
-        if self.plotEEG:
+        if self.eegThread.is_alive():
             pass
         else:
-            self.plotEEG = True
-            #self.eegThread.start()
+            self.eegThread = GuiThread()
+            self.eegThread.start()
             #self.eegPlot = EEGPlotWindow(self.sample_rate)
             #self.eegPlot.show()
 
@@ -172,7 +162,5 @@ class HBRecorderInterface():
         self.signalType = types
 
     def quit(self):
-        pass
-        #self.eegThread.close()
-        #self.eegPlot.stop()
-        #self.scorePlot.stop()
+        self.recorder.stop()
+
