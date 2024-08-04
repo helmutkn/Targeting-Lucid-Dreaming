@@ -1,5 +1,6 @@
 import cmd
 
+from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
 from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
 from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInterface
 
@@ -10,9 +11,10 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def __init__(self):
         cmd.Cmd.__init__(self)
-        self.headbandinterface = HBRecorderInterface()
-        self.eegThread = GuiThread()
+        self.rec = Recorder()
 
+        self.headbandinterface = HBRecorderInterface()
+        #self.eegThread = GuiThread()
 
     def do_hello(self, line):
         """Print a greeting."""
@@ -29,16 +31,17 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def do_start(self, line):
         """Start the recoring"""
-        self.headbandinterface.startRecording()
+        #self.headbandinterface.startRecording()
+        self.rec.start()
 
     def do_stop(self, line):
         """Stop the recording"""
-        self.headbandinterface.stopRecording()
+        #self.headbandinterface.stopRecording()
+        self.rec.stop()
 
     def do_show_signal(self, line):
         """Shoe the eeg signal"""
         try:
-            #self.eegThread.start()
             self.headbandinterface.show_eeg_signal()
         except Exception as e:
             print(e)
