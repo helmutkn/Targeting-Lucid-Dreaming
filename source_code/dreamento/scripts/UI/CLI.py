@@ -1,15 +1,17 @@
 import cmd
 import threading
 
+from PyQt5.QtWidgets import QApplication
+
 from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
-from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
+from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGVisThread
 from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInterface
 
 
 class CLIThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, app: QApplication):
         super().__init__()
-        self.cli = SleepRecorderCLI()
+        self.cli = SleepRecorderCLI(app)
 
     def run(self):
         self.cli.cmdloop()
@@ -19,35 +21,28 @@ class SleepRecorderCLI(cmd.Cmd):
     prompt = '>> '
     intro = 'Welcome to the sleep recoder CLI. type "help" for available commands.'
 
-    def __init__(self):
+    def __init__(self, app: QApplication):
         cmd.Cmd.__init__(self)
-        #self.rec = Recorder()
-
+        self.app = app
         self.headbandinterface = HBRecorderInterface()
-        #self.eegThread = GuiThread()
-
-    def do_hello(self, line):
-        """Print a greeting."""
-        print("Hello, World!")
 
     def do_quit(self, line):
         """Exit the CLI."""
         self.headbandinterface.quit()
+        self.app.quit()
         return True
 
     def do_connect(self, line):
         """Connect the recorder"""
-        self.headbandinterface.connectToSoftware()
+        self.headbandinterface.connect_to_software()
 
     def do_start(self, line):
         """Start the recoring"""
-        self.headbandinterface.startRecording()
-        #self.rec.start()
+        self.headbandinterface.start_recording()
 
     def do_stop(self, line):
         """Stop the recording"""
-        self.headbandinterface.stopRecording()
-        #self.rec.stop()
+        self.headbandinterface.stop_recording()
 
     def do_show_signal(self, line):
         """Shoe the eeg signal"""

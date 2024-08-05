@@ -10,17 +10,10 @@ from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInter
 def main():
     app = QApplication(sys.argv)
 
-    cliThread = CLIThread()
+    cliThread = CLIThread(app)
     cliThread.start()
 
     sys.exit(app.exec_())
 
-def test():
-    hb = HBRecorderInterface()
-    hb.connectToSoftware()
-    hb.startRecording()
-    time.sleep(5)
-    hb.stopRecording()
-
 if __name__ == '__main__':
-    main() #  test()
+    main()

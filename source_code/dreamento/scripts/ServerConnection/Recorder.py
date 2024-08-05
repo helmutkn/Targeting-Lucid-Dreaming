@@ -1,7 +1,6 @@
 import sys
 import threading
 
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 
@@ -23,7 +22,8 @@ class Recorder(threading.Thread):
     def stop(self):
         self.recorderThread.stop()
         self.recorderThread.quit()
-        self.app.quit()
+        if self.app:
+            self.app.quit()
 
 
 

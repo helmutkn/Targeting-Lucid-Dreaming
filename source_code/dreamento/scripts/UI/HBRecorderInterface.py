@@ -7,9 +7,11 @@ import requests
 from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
 from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
-from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
+from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGVisThread
 
 from PyQt5.QtCore import QObject
+
+from source_code.dreamento.scripts.UI.SleepStatePlot import SleepStateThread
 
 
 class HBRecorderInterface(QObject):
@@ -42,7 +44,8 @@ class HBRecorderInterface(QObject):
         self.sleepScoringModelPath = None
 
         # visualization
-        self.eegThread = GuiThread()
+        self.eegThread = EEGVisThread()
+        self.sleepStateThread = SleepStateThread()
 
         # program parameters
         self.scoreSleep = False
@@ -51,14 +54,14 @@ class HBRecorderInterface(QObject):
         self.webHookBaseAdress = "http://127.0.0.1:5000/"
         self.webhookActive = False
 
-    def connectToSoftware(self):
+    def connect_to_software(self):
         self.hb = ZmaxHeadband()
         if self.hb.readSocket is None or self.hb.writeSocket is None:  # HDServer is not running
             print('Sockets can not be initialized.')
         else:
             print('Connected')
 
-    def startRecording(self):
+    def start_recording(self):
         if self.isRecording:
             return
 
@@ -73,28 +76,26 @@ class HBRecorderInterface(QObject):
 
         self.recorder.start()
 
-        self.recorder.recorderThread.finished.connect(self.onRecordingFinished)
-        self.recorder.recorderThread.recordingFinishedSignal.connect(self.onRecordingFinishedWriteStimulationDB)
+        self.recorder.recorderThread.finished.connect(self.on_recording_finished)
+        self.recorder.recorderThread.recordingFinishedSignal.connect(self.on_recording_finished_write_stimulation_db)
         self.recorder.recorderThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
 
         print('recording started')
 
-    def stopRecording(self):
+    def stop_recording(self):
         if not self.isRecording:
             return
 
         self.recorder.stop()
-        #self.recordingThread.stop()
         self.isRecording = False
         print('recording stopped')
 
-    def onRecordingFinished(self):
+    def on_recording_finished(self):
         # when the recording is finished, this function is called
         self.isRecording = False
         print('recording finished')
 
-    def onRecordingFinishedWriteStimulationDB(self, fileName):
-        print('recording finished signal arrived')
+    def on_recording_finished_write_stimulation_db(self, fileName):
         # save triggered stimulation information on disk:
         with open(f'{fileName}-markers.json', 'w') as fp:
             json.dump(self.stimulationDataBase, fp, indent=4, separators=(',', ': '))
@@ -105,8 +106,14 @@ class HBRecorderInterface(QObject):
                 self.scoring_predictions.insert(0, -1)  # first epoch is not predicted, therefore put -1 instead
                 outfile.write("\n".join(str(item) for item in self.scoring_predictions))
 
-    def setSleepScoringModel(self, path):
+    def set_sleep_scoring_model(self, path):
         self.sleepScoringModelPath = path
+
+    def start_scoring(self):
+        self.scoreSleep = True
+
+    def stop_scoring(self):
+        self.scoreSleep = False
 
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
         self.epochCounter = epoch_counter
@@ -135,7 +142,7 @@ class HBRecorderInterface(QObject):
             # self.displayEpochPredictionResult(int(modelPrediction[0]),
             #                                  int(self.epochCounter))  # display prediction result on mainWindow
             self.scoring_predictions.append(int(modelPrediction[0]))
-            self.scorePlot.setData(int(modelPrediction[0]))
+            self.sleepStateThread.update_text(str(modelPrediction[0]))
 
         if self.webhookActive:
             if self.scoreSleep:
@@ -146,7 +153,7 @@ class HBRecorderInterface(QObject):
         if self.eegThread.is_alive():
             pass
         else:
-            self.eegThread = GuiThread()
+            self.eegThread = EEGVisThread()
             self.eegThread.start()
             #self.eegPlot = EEGPlotWindow(self.sample_rate)
             #self.eegPlot.show()
@@ -162,4 +169,4 @@ class HBRecorderInterface(QObject):
 
     def quit(self):
         self.recorder.stop()
-
+        self.eegThread.stop()
