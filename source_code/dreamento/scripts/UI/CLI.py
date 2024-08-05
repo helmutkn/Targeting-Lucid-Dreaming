@@ -1,8 +1,18 @@
 import cmd
+import threading
 
 from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
 from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
 from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInterface
+
+
+class CLIThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.cli = SleepRecorderCLI()
+
+    def run(self):
+        self.cli.cmdloop()
 
 
 class SleepRecorderCLI(cmd.Cmd):
@@ -75,7 +85,3 @@ class SleepRecorderCLI(cmd.Cmd):
     def do_show_possible_signals(self, line):
         mes = '[0=eegr, 1=eegl, 2=dx, 3=dy, 4=dz, 5=bodytemp, 6=bat, 7=noise, 8=light, 9=nasal_l, 10=nasal_r, 11=oxy_ir_ac, 12=oxy_r_ac, 13=oxy_dark_ac, 14=oxy_ir_dc, 15=oxy_r_dc, 16=oxy_dark_dc]'
         print(mes)
-
-    def do_test(self, line):
-        self.headbandinterface.eegThread.update_plot(range(100), range(100))
-

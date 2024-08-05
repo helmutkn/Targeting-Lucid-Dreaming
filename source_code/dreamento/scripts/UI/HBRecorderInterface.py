@@ -12,8 +12,10 @@ from source_code.dreamento.scripts.UI.EEGPlotWindow import GuiThread
 from PyQt5.QtCore import QObject
 
 
-class HBRecorderInterface:
+class HBRecorderInterface(QObject):
     def __init__(self):
+        super(HBRecorderInterface, self).__init__()
+
         self.sample_rate = 256
         # signal type
         self.signalType = [0, 1, 2, 3, 4, 5, 7, 8]
@@ -71,7 +73,6 @@ class HBRecorderInterface:
 
         self.recorder.start()
 
-        # TODO: This binding of the signals does not work. Therfore getEEG_from_thread is not called
         self.recorder.recorderThread.finished.connect(self.onRecordingFinished)
         self.recorder.recorderThread.recordingFinishedSignal.connect(self.onRecordingFinishedWriteStimulationDB)
         self.recorder.recorderThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
@@ -108,15 +109,13 @@ class HBRecorderInterface:
         self.sleepScoringModelPath = path
 
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
-        print('recieved data:')
         self.epochCounter = epoch_counter
 
         if self.eegThread.is_alive():
             sigR = eegSignal_r
             sigL = eegSignal_l
             t = [number / self.sample_rate for number in range(len(eegSignal_r))]
-            self.eegThread.update_plot(sigR, sigL)
-            print('signal sent to plot')
+            self.eegThread.update_plot(t, sigR, sigL)
 
         predictionToTransmit = None
         if self.scoreSleep:

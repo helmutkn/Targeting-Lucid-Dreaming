@@ -18,6 +18,9 @@ class PlotWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.sample_rate = 256
+        self.desiredXrange = 60
+
         # Set up the main window
         self.setWindowTitle('Plotting Example')
         self.setGeometry(100, 100, 800, 600)
@@ -29,14 +32,41 @@ class PlotWindow(QMainWindow):
 
         # Create a PlotWidget and add it to the layout
         self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setYRange(-500, 500)
         self.layout.addWidget(self.plot_widget)
 
-        # Create an empty plot
-        self.plot = self.plot_widget.plot()
+        # orig
+        self.EEGLinePen1 = pg.mkPen(color=(100, 90, 150), width=1.5)
+        self.EEGLinePen2 = pg.mkPen(color=(90, 170, 160), width=1.5)
 
-    def update_plot(self, x, y):
+        t = [number / self.sample_rate for number in range(self.sample_rate * 30)]  # sample_rate * 30 seconds
+
+        self.eegLine1 = self.plot_widget.plot(t, np.random.randn(30 * self.sample_rate), self.EEGLinePen1)
+        self.eegLine2 = self.plot_widget.plot(t, np.random.randn(30 * self.sample_rate), self.EEGLinePen2)
+
+    def update_plot(self, t, sigR, sigL):
         """Update the plot with new data."""
-        self.plot.setData(x, y)
+        self.eegLine1.setData(t, sigR, pen=self.EEGLinePen1)
+        self.eegLine2.setData(t, sigL, pen=self.EEGLinePen2)
+
+        self.displayedXrangeCounter = len(sigL)  # for plotting Xrange — number of displayed samples on screen
+
+        sec = int(np.floor(self.displayedXrangeCounter / self.sample_rate))
+        if sec % self.desiredXrange == 0:
+            random_reset_timer_variable = 30
+            k = int(np.floor(sec / self.desiredXrange))
+            if self.desiredXrange * k < random_reset_timer_variable:
+                xMin = self.desiredXrange * k
+                xMax = self.desiredXrange * (k + 1)
+            else:
+                xMin = 0
+                xMax = self.desiredXrange
+            a_X = self.plotWidget.getAxis('bottom')
+            ticks = range(xMin, xMax, 1)
+            a_X.setTicks([[(v, str(v)) for v in ticks]])
+            self.plotWidget.setXRange(xMin, xMax, padding=0)
+
+    ### ----------------------------------------------------------------------------
 
 
 class GuiThread(threading.Thread):
@@ -56,10 +86,9 @@ class GuiThread(threading.Thread):
         # Execute the application
         sys.exit(self.app.exec_())
 
-    def update_plot(self, x, y):
-        print('update_plot called')
+    def update_plot(self, t, sigR, sigL):
         if self.window:
-            self.window.update_plot(x, y)
+            self.window.update_plot(t, sigR, sigL)
 
 
 if __name__ == '__main__':
@@ -77,14 +106,11 @@ if __name__ == '__main__':
     time.sleep(3)
 
     # Run the CLI loop
-    #cli_loop(gui_thread)
+    # cli_loop(gui_thread)
 
     # Ensure the GUI thread is properly cleaned up on exit
     gui_thread.app.quit()
     gui_thread.join()
-
-
-
 
 
 class EEGPlotWidget(QtWidgets.QWidget):
@@ -110,7 +136,7 @@ class EEGPlotWidget(QtWidgets.QWidget):
         self.mainLayout.addWidget(self.plotWidget)
 
         self.setLayout(self.mainLayout)
-        #self.show()
+        # self.show()
 
     def setData(self, t, sigR, sigL):
         self.eegLine1.setData(t, sigR, pen=self.EEGLinePen1)
@@ -138,6 +164,7 @@ class EEGPlotWidget(QtWidgets.QWidget):
 
     def remove(self):
         self.hide()
+
 
 class EEGPlotWindow:
     def __init__(self, sample_rate):

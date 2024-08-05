@@ -35,7 +35,6 @@ class RecordThread(QThread):
         self.sendData2MainWindow.emit(data, columns)
 
     def sendEEGdata2main(self, eegSigR=None, eegSigL=None):
-        print('Sending EEG data:')
         self.sendEEGdata2MainWindow.emit(eegSigR, eegSigL, self.epochCounter)
 
     def run(self):
