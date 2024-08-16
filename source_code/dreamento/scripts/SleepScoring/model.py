@@ -14,7 +14,7 @@ logger = logging.getLogger("default_log")
 
 
 class Model:
-    def __init__(self, config=None, output_dir="./output", use_rnn=False, testing=False, use_best=False, device=None):
+    def __init__(self, config=None, output_dir="./output", testing=False, use_best=False, device=None):
         self.tsn = TinySleepNet(config)
         self.config = config
         self.output_dir = output_dir

@@ -116,6 +116,7 @@ class HBRecorderInterface(QObject):
         self.scoreSleep = False
 
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
+        print(epoch_counter)
         self.epochCounter = epoch_counter
 
         if self.eegThread.is_alive():
@@ -125,9 +126,11 @@ class HBRecorderInterface(QObject):
             self.eegThread.update_plot(t, sigR, sigL)
 
         predictionToTransmit = None
+        print(self.scoreSleep)
         if self.scoreSleep:
             if self.sleepScoringModel is None:
                 self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
+                print('sleep scoring model imported')
             # 30 seconds, each 256 samples... send recording for last 30 seconds to model for prediction
             sigRef = np.asarray(eegSignal_r)
             sigReq = np.asarray(eegSignal_l)

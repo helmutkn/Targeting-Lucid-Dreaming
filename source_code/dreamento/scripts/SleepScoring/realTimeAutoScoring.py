@@ -75,6 +75,7 @@ config = {
         "seq_length": 1,
     }
 
+
 def importModel(best_model_dir="./out_QS/train/4"):
     global config
     # Add dummy class weights
@@ -85,7 +86,8 @@ def importModel(best_model_dir="./out_QS/train/4"):
         output_dir=os.path.join(best_model_dir),
         use_rnn=True,
         testing=True,
-        use_best=True, )
+        use_best=True,
+    )
     return model
 
 
