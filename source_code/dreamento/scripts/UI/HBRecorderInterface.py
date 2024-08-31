@@ -1,3 +1,5 @@
+import os
+
 import json
 import sys
 
@@ -7,6 +9,7 @@ import requests
 from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
 from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
+from source_code.dreamento.scripts.SleepScoring.SleePyCoInference import SleePyCoInference
 from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGVisThread
 
 from PyQt5.QtCore import QObject
@@ -38,6 +41,13 @@ class HBRecorderInterface(QObject):
         self.stimulationDataBase = {}  # have info of all triggered stimulations
 
         # scoring
+        self.sleepScoringConfigPath = 'scripts/SleepScoring/SleePyCo/SleePyCo/configs/SleePyCo-Transformer_SL-10_numScales-3_Sleep-EDF-2018_freezefinetune.json'
+        with open(self.sleepScoringConfigPath, 'r') as config_file:
+            config = json.load(config_file)
+        config['name'] = os.path.basename(self.sleepScoringConfigPath).replace('.json', '')
+        self.sleepScoringConfig = config
+
+        self.inferenceModel = None
         self.sleepScoringModel = None
         self.scoring_predictions = []
         self.epochCounter = 0
@@ -126,20 +136,28 @@ class HBRecorderInterface(QObject):
             self.eegThread.update_plot(t, sigR, sigL)
 
         predictionToTransmit = None
-        print(self.scoreSleep)
         if self.scoreSleep:
-            if self.sleepScoringModel is None:
-                self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
+            if self.inferenceModel is None:
+                self.inferenceModel = SleePyCoInference(1, self.sleepScoringConfig)
                 print('sleep scoring model imported')
+
+            #if self.sleepScoringModel is None:
+            #    self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
+            #    print('sleep scoring model imported')
+
             # 30 seconds, each 256 samples... send recording for last 30 seconds to model for prediction
-            sigRef = np.asarray(eegSignal_r)
-            sigReq = np.asarray(eegSignal_l)
-            sigRef = sigRef.reshape((1, sigRef.shape[0]))
-            sigReq = sigReq.reshape((1, sigReq.shape[0]))
-            modelPrediction = realTimeAutoScoring.Predict_array(
-                output_dir="./DataiBand/output/Fp1-Fp2_filtered",
-                args_log_file="info_ch_extract.log", filtering_status=True,
-                lowcut=0.3, highcut=30, fs=256, signal_req=sigReq, signal_ref=sigRef, model=self.sleepScoringModel)
+            #sigRef = np.asarray(eegSignal_r)
+            #sigReq = np.asarray(eegSignal_l)
+            #sigRef = sigRef.reshape((1, sigRef.shape[0]))
+            #sigReq = sigReq.reshape((1, sigReq.shape[0]))
+
+            # inference
+            modelPrediction = self.inferenceModel.infere(np.asarray(eegSignal_r).reshape(1,1,len(eegSignal_r)))
+            #modelPrediction = realTimeAutoScoring.Predict_array(
+            #    output_dir="./DataiBand/output/Fp1-Fp2_filtered",
+            #    args_log_file="info_ch_extract.log", filtering_status=True,
+            #    lowcut=0.3, highcut=30, fs=256, signal_req=sigReq, signal_ref=sigRef, model=self.sleepScoringModel)
+
 
             predictionToTransmit = int(modelPrediction[0])
             # self.displayEpochPredictionResult(int(modelPrediction[0]),
