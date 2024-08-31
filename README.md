@@ -7,6 +7,23 @@ Before you use this repository I suggest you visit the original one and follow t
 ## changes from the original repository
 The TCP socket made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data put there by the HDServer.
 
+## TODO:
+- [X] implement always responsive console
+- [X] implement recorder
+  - [X] connect to software 
+  - [X] receive data from socket
+  - [ ] Pack the data received from the socket into 256 chunks, since the sample frequency is 256 and we want to structure it by seconds
+  - [ ] make sure we do not receive more than 256 (sampling frequency of zMax headband) samples per second
+  - [ ] when saving save the metadate, e.g. what signals are recorded. This is a program setting, therefore relevant
+- [X] implement visualization
+  - [X] for eeg singal
+  - [X] for automatic scoring prediction  
+- [ ] implement automatic scoring
+  - [X] implement the sleepyco model instead of tinysleep
+  - [ ] test sleepyco model on our custom data. make sure the sampling frequency is not hard coded somewhere in there
+- [X] implement webhook
+  - [X] for sleep scoring prediction
+  - [ ] 
 ## requirements
 - python 3.6
 
