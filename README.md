@@ -13,7 +13,7 @@ The TCP socket made problems in that the program was not able to read data from 
   - [X] connect to software 
   - [X] receive data from socket
   - [ ] Pack the data received from the socket into 256 chunks, since the sample frequency is 256 and we want to structure it by seconds
-  - [ ] make sure we do not receive more than 256 (sampling frequency of zMax headband) samples per second
+  - [ ] make sure we do not receive more than 256 (sampling frequency of zMax headband) samples per second. This can maybe be done by limiting the bytes to be read from the buffer. In ZMaxHeadband.read the line length is specified as 120 characters. Therefore the total packet length for one second of data should be 120 * 256, maybe its not exactly 120, because of tailing '\n', but it should be around that number.
   - [ ] when saving save the metadate, e.g. what signals are recorded. This is a program setting, therefore relevant
 - [X] implement visualization
   - [X] for eeg singal
