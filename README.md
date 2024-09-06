@@ -12,18 +12,20 @@ The TCP socket made problems in that the program was not able to read data from 
 - [X] implement recorder
   - [X] connect to software 
   - [X] receive data from socket
-  - [ ] Pack the data received from the socket into 256 chunks, since the sample frequency is 256 and we want to structure it by seconds
-  - [ ] make sure we do not receive more than 256 (sampling frequency of zMax headband) samples per second. This can maybe be done by limiting the bytes to be read from the buffer. In ZMaxHeadband.read the line length is specified as 120 characters. Therefore the total packet length for one second of data should be 120 * 256, maybe its not exactly 120, because of tailing '\n', but it should be around that number.
+  - [X] Pack the data received from the socket into 256 chunks, since the sample frequency is 256 and we want to structure it by seconds -> not necessary, since the server sends it in this manner.
   - [ ] when saving save the metadate, e.g. what signals are recorded. This is a program setting, therefore relevant
 - [X] implement visualization
   - [X] for eeg singal
   - [X] for automatic scoring prediction  
 - [ ] implement automatic scoring
   - [X] implement the sleepyco model instead of tinysleep
-  - [ ] test sleepyco model on our custom data. make sure the sampling frequency is not hard coded somewhere in there
+  - [X] test sleepyco model on our custom data. make sure the sampling frequency is not hard coded somewhere in there
 - [X] implement webhook
   - [X] for sleep scoring prediction
-  - [ ] 
+  - [X] for epoch
+- [ ] bugfixes
+  - [ ] when terminating the program gets stuck. probably has to do with threads
+  - [ ] the window opened with show_signal can crashes the app when moved or resized incorrectly  
 ## requirements
 - python 3.6
 
