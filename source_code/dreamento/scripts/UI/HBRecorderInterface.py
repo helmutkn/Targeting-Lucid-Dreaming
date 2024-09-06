@@ -5,16 +5,16 @@ import sys
 
 import numpy as np
 import requests
+from PyQt5.QtWidgets import QApplication
 
 from scripts.ServerConnection.Recorder import Recorder
 from scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
 from scripts.SleepScoring import realTimeAutoScoring
 from scripts.SleepScoring.SleePyCoInference import SleePyCoInference
 from scripts.UI.EEGPlotWindow import EEGVisThread
-from scripts.UI.SleepStatePlot import SleepStateThread
+from scripts.UI.ESleepStages import ESleepState
 
 from PyQt5.QtCore import QObject
-
 
 
 class HBRecorderInterface(QObject):
@@ -48,20 +48,17 @@ class HBRecorderInterface(QObject):
         self.sleepScoringConfig = config
 
         self.inferenceModel = None
-        self.sleepScoringModel = None
         self.scoring_predictions = []
         self.epochCounter = 0
-        self.sleepScoringModelPath = None
 
         # visualization
         self.eegThread = EEGVisThread()
-        self.sleepStateThread = SleepStateThread()
 
         # program parameters
         self.scoreSleep = False
 
         # webhook
-        self.webHookBaseAdress = "http://127.0.0.1:5000/"
+        self.webHookBaseAdress = "http://127.0.0.1:5000/webhookcallback/"
         self.webhookActive = False
 
     def connect_to_software(self):
@@ -116,17 +113,15 @@ class HBRecorderInterface(QObject):
                 self.scoring_predictions.insert(0, -1)  # first epoch is not predicted, therefore put -1 instead
                 outfile.write("\n".join(str(item) for item in self.scoring_predictions))
 
-    def set_sleep_scoring_model(self, path):
-        self.sleepScoringModelPath = path
-
     def start_scoring(self):
         self.scoreSleep = True
+        print('scoring started')
 
     def stop_scoring(self):
         self.scoreSleep = False
+        print('scoring stopped')
 
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
-        print(epoch_counter)
         self.epochCounter = epoch_counter
 
         if self.eegThread.is_alive():
@@ -135,40 +130,25 @@ class HBRecorderInterface(QObject):
             t = [number / self.sample_rate for number in range(len(eegSignal_r))]
             self.eegThread.update_plot(t, sigR, sigL)
 
-        predictionToTransmit = None
         if self.scoreSleep:
             if self.inferenceModel is None:
                 self.inferenceModel = SleePyCoInference(1, self.sleepScoringConfig)
                 print('sleep scoring model imported')
 
-            #if self.sleepScoringModel is None:
-            #    self.sleepScoringModel = realTimeAutoScoring.importModel(self.sleepScoringModelPath)
-            #    print('sleep scoring model imported')
-
-            # 30 seconds, each 256 samples... send recording for last 30 seconds to model for prediction
-            #sigRef = np.asarray(eegSignal_r)
-            #sigReq = np.asarray(eegSignal_l)
-            #sigRef = sigRef.reshape((1, sigRef.shape[0]))
-            #sigReq = sigReq.reshape((1, sigReq.shape[0]))
-
             # inference
-            modelPrediction = self.inferenceModel.infere(np.asarray(eegSignal_r).reshape(1,1,len(eegSignal_r)))
-            #modelPrediction = realTimeAutoScoring.Predict_array(
-            #    output_dir="./DataiBand/output/Fp1-Fp2_filtered",
-            #    args_log_file="info_ch_extract.log", filtering_status=True,
-            #    lowcut=0.3, highcut=30, fs=256, signal_req=sigReq, signal_ref=sigRef, model=self.sleepScoringModel)
+            if len(eegSignal_r) == 30*256:  # only when one full epoch can be sent to the model
+                modelPrediction = self.inferenceModel.infere(np.asarray(eegSignal_r).reshape(1,1,len(eegSignal_r)))
+                predictionToTransmit = int(modelPrediction[0])
+                self.scoring_predictions.append(ESleepState(predictionToTransmit))
 
-
-            predictionToTransmit = int(modelPrediction[0])
-            # self.displayEpochPredictionResult(int(modelPrediction[0]),
-            #                                  int(self.epochCounter))  # display prediction result on mainWindow
-            self.scoring_predictions.append(int(modelPrediction[0]))
-            self.sleepStateThread.update_text(str(modelPrediction[0]))
-
-        if self.webhookActive:
-            if self.scoreSleep:
-                data = {'state': predictionToTransmit}
-                requests.post(self.webHookBaseAdress + 'sleepstate', data=data)
+                if self.webhookActive:
+                    data = {'state': ESleepState(predictionToTransmit),
+                            'epoch': self.epochCounter}
+                    try:
+                        requests.post(self.webHookBaseAdress + 'sleepstate', data=data)
+                    except Exception as e:
+                        print(e)
+                        print('webhook is probably not available')
 
     def show_eeg_signal(self):
         if self.eegThread.is_alive():
@@ -176,18 +156,29 @@ class HBRecorderInterface(QObject):
         else:
             self.eegThread = EEGVisThread()
             self.eegThread.start()
-            #self.eegPlot = EEGPlotWindow(self.sample_rate)
-            #self.eegPlot.show()
 
     def start_webhook(self):
-        self.webhookActive = True
+        try:
+            requests.post(self.webHookBaseAdress + 'hello', data={'hello': 'hello'})
+            self.webhookActive = True
+        except Exception as e:
+            print(e)
+            print('webhook seems to be offline. not activating')
+            return
+        print('webhook started')
 
     def stop_webhook(self):
         self.webhookActive = False
+        print('webhook stopped')
 
     def set_signaltype(self, types: list = []):
         self.signalType = types
 
     def quit(self):
+        print('HB terminating sequence started')
         self.recorder.stop()
+        self.recorder.join()
+        print('recorder stopped')
         self.eegThread.stop()
+        self.eegThread.join()
+        print('eegThread stopped')

@@ -28,8 +28,11 @@ class SleepRecorderCLI(cmd.Cmd):
 
     def do_quit(self, line):
         """Exit the CLI."""
+        print('quit procedure initiated')
         self.headbandinterface.quit()
+        print('headband terminated')
         self.app.quit()
+        print('app terminated')
         return True
 
     def do_connect(self, line):
@@ -55,12 +58,11 @@ class SleepRecorderCLI(cmd.Cmd):
         """start scoring the eeg signal using the specified model"""
         self.headbandinterface.start_scoring()
 
-    def do_show_scoring(self, line):
-        """visualize the predictions of the scoring model"""
-        self.headbandinterface.show_scoring_predictions()
+    def do_stop_scoring(self, line):
+        self.headbandinterface.stop_recording()
 
     def do_start_webhook(self, line):
-        """start the webhook so other programs can red the prediction status from the port 5000"""
+        """start the webhook so other programs can read the prediction status from the port 5000. This recorder sends the data there every 30 seconds."""
         self.headbandinterface.start_webhook()
 
     def do_stop_webhook(self, line):

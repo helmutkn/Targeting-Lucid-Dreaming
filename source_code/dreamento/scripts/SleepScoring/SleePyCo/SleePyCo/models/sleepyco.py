@@ -153,7 +153,7 @@ class ChannelGate(nn.Module):
             else:
                 channel_att_sum = channel_att_sum + channel_att_raw
 
-        scale = F.sigmoid(channel_att_sum).unsqueeze(2).expand_as(x)
+        scale = torch.sigmoid(channel_att_sum).unsqueeze(2).expand_as(x)
         return x * scale
 
 

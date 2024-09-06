@@ -137,7 +137,7 @@ class RecordThread(QThread):
 
         self.recordingFinishedSignal.emit(f"{file_path}\\{dt_string}")  # send path of recorded file to mainWindow
 
-        sys.exit(self.app.exec_())
+        #sys.exit(self.app.exec_())
 
     def stop(self):
         self.threadactive = False

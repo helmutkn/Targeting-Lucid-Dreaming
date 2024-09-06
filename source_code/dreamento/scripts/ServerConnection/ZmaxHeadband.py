@@ -54,7 +54,6 @@ class ZmaxHeadband():
         self.readSocket, self.writeSocket = connect()
         self.msgn = 1  # message number for sending stimulation
 
-    #@profile
     def read(self, reqIDs=[0, 1]):
         """
         output refers to a list of lists of the desired outputs of the function for example [0,1,3] returns [[eegl, eegr, dy], [eegl, eegr, dy]]

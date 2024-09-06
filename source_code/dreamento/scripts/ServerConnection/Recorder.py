@@ -20,10 +20,14 @@ class Recorder(threading.Thread):
         sys.exit(self.app.exec())
 
     def stop(self):
+        print('Recorder termination started')
         self.recorderThread.stop()
+        print('recorderThread stopped')
         self.recorderThread.quit()
+        print('recorderThread quit')
         if self.app:
             self.app.quit()
+            print('app quit')
 
 
 
