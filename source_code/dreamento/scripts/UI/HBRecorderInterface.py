@@ -6,15 +6,15 @@ import sys
 import numpy as np
 import requests
 
-from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
-from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
-from source_code.dreamento.scripts.SleepScoring import realTimeAutoScoring
-from source_code.dreamento.scripts.SleepScoring.SleePyCoInference import SleePyCoInference
-from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGVisThread
+from scripts.ServerConnection.Recorder import Recorder
+from scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
+from scripts.SleepScoring import realTimeAutoScoring
+from scripts.SleepScoring.SleePyCoInference import SleePyCoInference
+from scripts.UI.EEGPlotWindow import EEGVisThread
+from scripts.UI.SleepStatePlot import SleepStateThread
 
 from PyQt5.QtCore import QObject
 
-from source_code.dreamento.scripts.UI.SleepStatePlot import SleepStateThread
 
 
 class HBRecorderInterface(QObject):

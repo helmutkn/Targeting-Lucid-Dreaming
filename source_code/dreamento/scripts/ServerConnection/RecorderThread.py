@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from pathlib import Path
 import numpy as np
 
-from source_code.dreamento.scripts.ServerConnection.ZmaxHeadband import ZmaxDataID, ZmaxHeadband
+from scripts.ServerConnection.ZmaxHeadband import ZmaxDataID, ZmaxHeadband
 
 
 class RecordThread(QThread):

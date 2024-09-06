@@ -3,9 +3,9 @@ import threading
 
 from PyQt5.QtWidgets import QApplication
 
-from source_code.dreamento.scripts.ServerConnection.Recorder import Recorder
-from source_code.dreamento.scripts.UI.EEGPlotWindow import EEGVisThread
-from source_code.dreamento.scripts.UI.HBRecorderInterface import HBRecorderInterface
+from scripts.ServerConnection.Recorder import Recorder
+from scripts.UI.EEGPlotWindow import EEGVisThread
+from scripts.UI.HBRecorderInterface import HBRecorderInterface
 
 
 class CLIThread(threading.Thread):

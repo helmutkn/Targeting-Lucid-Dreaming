@@ -2,7 +2,7 @@ import sys
 import threading
 
 from PyQt5.QtWidgets import QApplication
-from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
+from scripts.ServerConnection.RecorderThread import RecordThread
 
 
 class Recorder(threading.Thread):

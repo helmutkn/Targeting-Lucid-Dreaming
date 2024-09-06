@@ -3,7 +3,7 @@ import os
 import numpy as np
 import torch
 
-from models.main_model import MainModel
+from scripts.SleepScoring.SleePyCo.SleePyCo.models.main_model import MainModel
 
 
 class SleePyCoInference:

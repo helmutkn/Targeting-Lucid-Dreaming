@@ -8,7 +8,7 @@ from torch.optim import Adam
 from tensorboardX import SummaryWriter
 import logging
 
-from source_code.dreamento.scripts.SleepScoring.network import TinySleepNet
+from scripts.SleepScoring.network import TinySleepNet
 
 logger = logging.getLogger("default_log")
 
