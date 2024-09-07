@@ -25,7 +25,8 @@ The TCP socket made problems in that the program was not able to read data from 
   - [X] for epoch
 - [ ] bugfixes
   - [ ] when terminating the program gets stuck. probably has to do with threads
-  - [ ] the window opened with show_signal can crashes the app when moved or resized incorrectly  
+  - [ ] the window opened with show_signal can crashes the app when moved or resized incorrectly
+- [ ] record a night and the scoring. Let this recording score by the HDScorer and compare.
 ## requirements
 - python 3.6
 
