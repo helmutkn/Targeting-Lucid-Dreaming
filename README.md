@@ -4,8 +4,12 @@ This repository contains an implementation of the **dreamento online**, altered 
 
 Before you use this repository I suggest you visit the original one and follow the instructions there.
 
+We changed the model for sleep scoring (since we were not able to find the trained checkpoints for the model used in dreamento) to SleePyCo from https://github.com/gist-ailab/SleePyCo and made it fit our architecture. 
+
+For citation please make sure you follow the original repository's suggestions!
+
 ## changes from the original repository
-The TCP socket made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data put there by the HDServer.
+The TCP socket implemented in dreamento made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data. 
 
 ## TODO:
 - [X] implement always responsive console
