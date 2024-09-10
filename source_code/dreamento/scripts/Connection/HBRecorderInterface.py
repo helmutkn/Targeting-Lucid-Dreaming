@@ -14,15 +14,14 @@ from scripts.SleepScoring.SleePyCoInference import SleePyCoInference
 from scripts.UI.EEGPlotWindow import EEGVisThread
 from scripts.UI.ESleepStages import ESleepState
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, QThread
+
+from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 
 
-class HBRecorderInterface(QObject):
+class HBRecorderInterface:
     def __init__(self):
-        super(HBRecorderInterface, self).__init__()
-
         self.sample_rate = 256
-        # signal type
         self.signalType = [0, 1, 2, 3, 4, 5, 7, 8]
         # [
         #   0=eegr, 1=eegl, 2=dx, 3=dy, 4=dz, 5=bodytemp,
@@ -32,7 +31,8 @@ class HBRecorderInterface(QObject):
         # ]
 
         self.hb = None
-        self.recorder = Recorder(self.signalType)
+        self.recorderThread = None
+        self.isConnected = False
 
         self.isRecording = False
         self.firstRecording = True
@@ -52,7 +52,7 @@ class HBRecorderInterface(QObject):
         self.epochCounter = 0
 
         # visualization
-        self.eegThread = EEGVisThread()
+        self.eegThread = None
 
         # program parameters
         self.scoreSleep = False
@@ -66,13 +66,14 @@ class HBRecorderInterface(QObject):
         if self.hb.readSocket is None or self.hb.writeSocket is None:  # HDServer is not running
             print('Sockets can not be initialized.')
         else:
+            self.isConnected = True
             print('Connected')
 
     def start_recording(self):
         if self.isRecording:
             return
 
-        self.recorder = Recorder(self.signalType)
+        self.recorderThread = RecordThread(signalType=self.signalType)
 
         if self.firstRecording:
             # TODO: init sleep scoring model here
@@ -81,11 +82,11 @@ class HBRecorderInterface(QObject):
 
         self.isRecording = True
 
-        self.recorder.start()
+        self.recorderThread.start()
 
-        self.recorder.recorderThread.finished.connect(self.on_recording_finished)
-        self.recorder.recorderThread.recordingFinishedSignal.connect(self.on_recording_finished_write_stimulation_db)
-        self.recorder.recorderThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)  # sending data for plotting, scoring, etc.
+        self.recorderThread.finished.connect(self.on_recording_finished)
+        self.recorderThread.recordingFinishedSignal.connect(self.on_recording_finished_write_stimulation_db)
+        self.recorderThread.sendEEGdata2MainWindow.connect(self.getEEG_from_thread)
 
         print('recording started')
 
@@ -93,7 +94,8 @@ class HBRecorderInterface(QObject):
         if not self.isRecording:
             return
 
-        self.recorder.stop()
+        self.recorderThread.stop()
+        self.recorderThread.quit()
         self.isRecording = False
         print('recording stopped')
 
@@ -124,7 +126,7 @@ class HBRecorderInterface(QObject):
     def getEEG_from_thread(self, eegSignal_r, eegSignal_l, epoch_counter=0):
         self.epochCounter = epoch_counter
 
-        if self.eegThread.is_alive():
+        if self.eegThread and self.eegThread.is_alive():
             sigR = eegSignal_r
             sigL = eegSignal_l
             t = [number / self.sample_rate for number in range(len(eegSignal_r))]
@@ -151,10 +153,12 @@ class HBRecorderInterface(QObject):
                         print('webhook is probably not available')
 
     def show_eeg_signal(self):
-        if self.eegThread.is_alive():
-            pass
-        else:
+        if not self.eegThread:
             self.eegThread = EEGVisThread()
+
+        if self.eegThread.is_alive():
+            self.eegThread.stop()
+        else:
             self.eegThread.start()
 
     def start_webhook(self):
@@ -175,10 +179,10 @@ class HBRecorderInterface(QObject):
         self.signalType = types
 
     def quit(self):
-        print('HB terminating sequence started')
-        self.recorder.stop()
-        self.recorder.join()
-        print('recorder stopped')
-        self.eegThread.stop()
-        self.eegThread.join()
-        print('eegThread stopped')
+        if self.recorderThread:
+            self.recorderThread.stop()
+            self.recorderThread.quit()
+
+        if self.eegThread and self.eegThread.isRunning():
+            self.eegThread.stop()
+            self.eegThread.quit()

@@ -1,9 +1,7 @@
 import os
-import sys
-from datetime import datetime  # for saving files with exact time
+from datetime import datetime
 import time
 from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication
 from pathlib import Path
 import numpy as np
 
@@ -17,7 +15,6 @@ class RecordThread(QThread):
 
     def __init__(self, parent=None, signalType=None):
         super(RecordThread, self).__init__(parent)
-        self.app = None
         if signalType is None:
             signalType = [0, 1, 5, 2, 3, 4]
         self.model_CNNLSTM = None
@@ -38,8 +35,6 @@ class RecordThread(QThread):
         self.sendEEGdata2MainWindow.emit(eegSigR, eegSigL, self.epochCounter)
 
     def run(self):
-        self.app = QApplication(sys.argv)
-
         # This part of the cord RECORDS signal.
         # In each second, also calculates the sampling rate (# of samples received by program over stream)
         recording = []
@@ -71,7 +66,6 @@ class RecordThread(QThread):
             if self.epochCounter % 60 == 0 and dataSamplesToAnalyzeCounter == 0:
                 del hb
                 hb = ZmaxHeadband()
-                #("New HB created after 60 epochs")
 
             self.dataSampleCounter = 0  # count samples in each second
             self.secondCounter += 1
@@ -80,7 +74,6 @@ class RecordThread(QThread):
 
             t_end = time.time() + 1
 
-            #print(f'{self.secondCounter} start')
             while time.time() < t_end:
                 x = hb.read(cols[:-2])
                 if x:
@@ -116,7 +109,6 @@ class RecordThread(QThread):
             #print(f'{self.dataSampleCounter} samples')
             if buffer2analyzeIsReady:
                 # send eeg data of last 30 seconds (30*256 samples) to mainWindow for plotting (spectrogram and periodogram) and sleep scoring
-                #print('sending eeg to main')
                 self.sendEEGdata2main(eegSigR=sigR_accumulative, eegSigL=sigL_accumulative)
                 dataSamplesToAnalyzeCounter = 0
                 buffer2analyzeIsReady = False
@@ -137,8 +129,6 @@ class RecordThread(QThread):
 
         self.recordingFinishedSignal.emit(f"{file_path}\\{dt_string}")  # send path of recorded file to mainWindow
 
-        #sys.exit(self.app.exec_())
 
     def stop(self):
         self.threadactive = False
-        #self.wait()

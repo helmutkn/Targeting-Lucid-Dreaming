@@ -1,19 +1,10 @@
-import sys
-import time
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication
-
-from scripts.UI.CLI import SleepRecorderCLI, CLIThread
-from scripts.UI.HBRecorderInterface import HBRecorderInterface
+from source_code.dreamento.scripts.Utils.communicationLogic import CommunicationLogic
 
 
 def main():
-    app = QApplication(sys.argv)
+    logic = CommunicationLogic()
+    logic.start()
 
-    cliThread = CLIThread(app)
-    cliThread.start()
-
-    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()

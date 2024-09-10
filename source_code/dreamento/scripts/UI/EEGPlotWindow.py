@@ -1,9 +1,5 @@
-import time
-
-from PyQt5 import QtWidgets
-
 import sys
-import threading
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 import pyqtgraph as pg
 import numpy as np
@@ -62,31 +58,42 @@ class EEGWindow(QMainWindow):
             self.plotWidget.setXRange(xMin, xMax, padding=0)
 
 
-class EEGVisThread(threading.Thread):
+class EEGWorker(QObject):
+    data_ready = pyqtSignal(list, list, list)  # Signals will carry t, sigR, sigL
+
     def __init__(self):
         super().__init__()
-        self.app = None
-        self.window = None
-
-    def run(self):
-        # Create the application instance
-        self.app = QApplication(sys.argv)
-
-        # Create and show the main window
-        self.window = EEGWindow()
-        self.window.show()
-
-        # Execute the application
-        sys.exit(self.app.exec_())
 
     def update_plot(self, t, sigR, sigL):
-        if self.window:
-            self.window.update_plot(t, sigR, sigL)
+        # Emit the signal to send data to the GUI thread
+        self.data_ready.emit(t, sigR, sigL)
+
+
+class EEGVisThread(QThread):
+    def __init__(self):
+        super().__init__()
+        self.window = None
+        self.worker = None
+        self.running = False
+
+    def run(self):
+        self.app = QApplication(sys.argv)
+
+        self.window = EEGWindow()
+        self.worker = EEGWorker()
+
+        self.worker.data_ready.connect(self.window.update_plot)
+        self.window.show()
+
+        self.app.exec_()
+
+    def update_plot(self, t, sigR, sigL):
+        if self.worker:
+            self.worker.update_plot(t, sigR, sigL)
+
+    def is_alive(self):
+        return self.isRunning()
 
     def stop(self):
-        if self.app:
-            self.app.quit()
-
-
-if __name__ == '__main__':
-    pass
+        self.app.quit()
+        self.app.exit()

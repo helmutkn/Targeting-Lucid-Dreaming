@@ -13,7 +13,7 @@ def sleepStateHook():
     return "received"
 
 @app.route('/webhookcallback/hello', methods=['POST'])
-def sleepStateHook():
+def helloHook():
     msg = request.values.get('hello')
     print(f'hello message sent. message: {msg}')
 
