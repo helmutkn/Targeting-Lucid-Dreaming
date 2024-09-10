@@ -22,6 +22,7 @@ dataclasses==0.8
 decorator==5.1.1
 defusedxml==0.7.1
 entrypoints==0.4
+Flask==2.0.3
 flatbuffers==1.12
 gast==0.4.0
 google-auth==2.22.0
@@ -36,6 +37,7 @@ ipykernel==5.5.6
 ipython==7.16.3
 ipython-genutils==0.2.0
 ipywidgets==7.8.1
+itsdangerous==2.0.1
 jedi==0.17.2
 Jinja2==3.0.3
 joblib==1.1.1
@@ -74,7 +76,7 @@ pickleshare==0.7.5
 Pillow==8.4.0
 prometheus-client==0.17.1
 prompt-toolkit==3.0.36
-protobuf==3.19.6
+protobuf==4.21.0
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
 pycparser==2.21
@@ -107,6 +109,7 @@ stochastic==0.6.0
 tensorboard==2.10.1
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
+tensorboardX==2.6.2.2
 tensorflow==2.6.0
 tensorflow-estimator==2.8.0
 tensorpac==0.6.5
@@ -115,6 +118,7 @@ terminado==0.12.1
 testpath==0.6.0
 tf-slim==1.1.0
 threadpoolctl==3.1.0
+torch==1.10.2
 tornado==6.1
 traitlets==4.3.3
 typing-extensions==3.7.4.3
