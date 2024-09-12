@@ -1,4 +1,4 @@
-from source_code.dreamento.scripts.Utils.communicationLogic import CommunicationLogic
+from scripts.Utils.communicationLogic import CommunicationLogic
 
 
 def main():
