@@ -4,9 +4,33 @@ This repository contains an implementation of the **dreamento online**, altered 
 
 Before you use this repository I suggest you visit the original one and follow the instructions there.
 
-## changes from the original repository
-The TCP socket made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data put there by the HDServer.
+We changed the model for sleep scoring (since we were not able to find the trained checkpoints for the model used in dreamento) to SleePyCo from https://github.com/gist-ailab/SleePyCo and made it fit our architecture. 
 
+For citation please make sure you follow the original repository's suggestions!
+
+## changes from the original repository
+The TCP socket implemented in dreamento made problems in that the program was not able to read data from it. Therefore I implemented a raw socket to read the data. 
+
+## TODO:
+- [X] implement always responsive console
+- [X] implement recorder
+  - [X] connect to software 
+  - [X] receive data from socket
+  - [X] Pack the data received from the socket into 256 chunks, since the sample frequency is 256 and we want to structure it by seconds -> not necessary, since the server sends it in this manner.
+  - [ ] when saving save the metadate, e.g. what signals are recorded. This is a program setting, therefore relevant
+- [X] implement visualization
+  - [X] for eeg singal
+  - [X] for automatic scoring prediction  
+- [ ] implement automatic scoring
+  - [X] implement the sleepyco model instead of tinysleep
+  - [X] test sleepyco model on our custom data. make sure the sampling frequency is not hard coded somewhere in there
+- [X] implement webhook
+  - [X] for sleep scoring prediction
+  - [X] for epoch
+- [ ] bugfixes
+  - [ ] when terminating the program gets stuck. probably has to do with threads
+  - [ ] the window opened with show_signal can crashes the app when moved or resized incorrectly
+- [ ] record a night and the scoring. Let this recording score by the HDScorer and compare.
 ## requirements
 - python 3.6
 

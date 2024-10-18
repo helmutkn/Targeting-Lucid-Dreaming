@@ -1,22 +1,15 @@
 import os
 
 import json
-import sys
 
 import numpy as np
 import requests
-from PyQt5.QtWidgets import QApplication
 
-from scripts.ServerConnection.Recorder import Recorder
-from scripts.ServerConnection.ZmaxHeadband import ZmaxHeadband
-from scripts.SleepScoring import realTimeAutoScoring
+from scripts.Connection.ZmaxHeadband import ZmaxHeadband
+from scripts.Utils.RecorderThread import RecordThread
+from scripts.Utils.ESleepStages import ESleepState
 from scripts.SleepScoring.SleePyCoInference import SleePyCoInference
 from scripts.UI.EEGPlotWindow import EEGVisThread
-from scripts.UI.ESleepStages import ESleepState
-
-from PyQt5.QtCore import QObject, QThread
-
-from source_code.dreamento.scripts.ServerConnection.RecorderThread import RecordThread
 
 
 class HBRecorderInterface:
