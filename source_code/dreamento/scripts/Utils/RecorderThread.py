@@ -5,7 +5,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from pathlib import Path
 import numpy as np
 
-from scripts.ServerConnection.ZmaxHeadband import ZmaxDataID, ZmaxHeadband
+from scripts.Connection.ZmaxHeadband import ZmaxDataID, ZmaxHeadband
 
 
 class RecordThread(QThread):

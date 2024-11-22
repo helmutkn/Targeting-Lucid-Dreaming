@@ -2,8 +2,8 @@ import numpy as np
 import time
 import enum
 
-from scripts.ServerConnection.ZmaxSocket import ZmaxSocket
-from scripts.ServerConnection.CustomSocket import CustomSocket
+from scripts.Connection.ZmaxSocket import ZmaxSocket
+from scripts.Connection.CustomSocket import CustomSocket
 
 
 class ZmaxDataID(enum.Enum):

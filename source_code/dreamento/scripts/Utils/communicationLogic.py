@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from scripts.UI.CLI import CLIThread
 
-from source_code.dreamento.scripts.ServerConnection.HBRecorderInterface import HBRecorderInterface
+from scripts.Connection.HBRecorderInterface import HBRecorderInterface
 
 
 class CommunicationLogic:
